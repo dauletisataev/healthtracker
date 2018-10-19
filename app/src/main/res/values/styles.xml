@@ -3,9 +3,15 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorPrimary">#2DBCA6</item>
+        <item name="colorPrimaryDark">#EBEEE3</item>
+        <item name="colorAccent">#2DBCA6</item>
+    </style>
+
+    <style name="EdTx" parent="Base.V7.Widget.AppCompat.EditText">
+        <item name="android:bottomLeftRadius">6dp</item>
+        <item name="android:bottomRightRadius">6dp</item>
+        <item name="android:background">#fff</item>
     </style>
 
 </resources>
