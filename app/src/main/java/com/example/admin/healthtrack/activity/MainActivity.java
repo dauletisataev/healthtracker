@@ -1,4 +1,4 @@
-package com.example.admin.healthtrack;
+package com.example.admin.healthtrack.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -18,11 +18,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.example.admin.healthtrack.activity.AboutUsActivity;
+import com.example.admin.healthtrack.R;
 import com.example.admin.healthtrack.fragments.ScheduleFragment;
 import com.example.admin.healthtrack.fragments.StatisticsFragment;
 import com.example.admin.healthtrack.other.CircleTransform;
@@ -236,19 +235,19 @@ public class MainActivity extends AppCompatActivity {
                         navItemIndex = 0;
                         CURRENT_TAG = TAG_HOME;
                         break;
-                    case R.id.nav_photos:
+                    case R.id.nav_stat:
                         navItemIndex = 1;
                         CURRENT_TAG = TAG_PHOTOS;
                         break;
-                    case R.id.nav_movies:
+                    case R.id.nav_treatment:
                         navItemIndex = 2;
                         CURRENT_TAG = TAG_MOVIES;
                         break;
-                    case R.id.nav_notifications:
+                    case R.id.nav_chat:
                         navItemIndex = 3;
                         CURRENT_TAG = TAG_NOTIFICATIONS;
                         break;
-                    case R.id.nav_settings:
+                    case R.id.nav_sync:
                         navItemIndex = 4;
                         CURRENT_TAG = TAG_SETTINGS;
                         break;

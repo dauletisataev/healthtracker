@@ -7,23 +7,23 @@
             android:icon="@drawable/ic_home_black_24dp"
             android:title="@string/nav_home" />
         <item
-            android:id="@+id/nav_photos"
-            android:icon="@drawable/ic_photo_library_black_24dp"
-            android:title="@string/nav_photos" />
+            android:id="@+id/nav_stat"
+            android:icon="@drawable/ic_graph_black_18dp"
+            android:title="@string/nav_stat" />
         <item
-            android:id="@+id/nav_movies"
-            android:icon="@drawable/ic_local_movies_black_24dp"
-            android:title="@string/nav_movies" />
+            android:id="@+id/nav_treatment"
+            android:icon="@drawable/ic_list_black_18dp"
+            android:title="@string/nav_treatments" />
 
         <item
-            android:id="@+id/nav_notifications"
-            android:icon="@drawable/ic_notifications_black_24dp"
-            android:title="@string/nav_notifications" />
+            android:id="@+id/nav_chat"
+            android:icon="@drawable/ic_chat_black_18dp"
+            android:title="@string/nav_chat" />
 
         <item
-            android:id="@+id/nav_settings"
-            android:icon="@drawable/ic_settings_black_24dp"
-            android:title="@string/nav_settings" />
+            android:id="@+id/nav_sync"
+            android:icon="@drawable/ic_sync_black_18dp"
+            android:title="@string/nav_sync" />
     </group>
 
     <item android:title="Other">
