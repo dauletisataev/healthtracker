@@ -6,12 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".fragments.StatisticsFragment">
 
-    <com.txusballesteros.widgets.FitChart
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        app:animationMode="overdraw"
-        app:backStrokeColor="#00ff00"
-        app:strokeSize="10dp"
-        app:valueStrokeColor="#ff0000" />
+
 
 </FrameLayout>

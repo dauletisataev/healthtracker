@@ -1,6 +1,7 @@
 package com.example.admin.healthtrack.activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
@@ -24,6 +25,8 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.admin.healthtrack.R;
 import com.example.admin.healthtrack.fragments.ScheduleFragment;
 import com.example.admin.healthtrack.fragments.StatisticsFragment;
+import com.example.admin.healthtrack.fragments.SyncFragment;
+import com.example.admin.healthtrack.fragments.TreatmentsFragment;
 import com.example.admin.healthtrack.other.CircleTransform;
 
 
@@ -194,19 +197,15 @@ public class MainActivity extends AppCompatActivity {
                 // home
                 return scheduleFragment;
             case 1:
-                // photos
                 StatisticsFragment statisticsFragment = new StatisticsFragment();
                 return statisticsFragment;
             case 2:
-                // movies fragment
-                return scheduleFragment;
+                return new TreatmentsFragment();
             case 3:
-                // notifications fragment
-                return scheduleFragment;
+                return new StatisticsFragment();
 
             case 4:
-                // settings fragment
-                return scheduleFragment;
+                return new SyncFragment();
             default:
                 return new ScheduleFragment();
         }
@@ -250,6 +249,15 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.nav_sync:
                         navItemIndex = 4;
                         CURRENT_TAG = TAG_SETTINGS;
+                        break;
+                    case R.id.nav_logout:
+                        navItemIndex = 5;
+                        SharedPreferences.Editor editor = getSharedPreferences("FitApp", MODE_PRIVATE).edit();
+                        editor.putBoolean("logged", false);
+                        editor.apply();
+                        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
                         break;
                     case R.id.nav_about_us:
                         // launch new intent instead of loading fragment

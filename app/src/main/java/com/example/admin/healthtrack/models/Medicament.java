@@ -6,7 +6,7 @@ public class Medicament {
     public int days;
     public float dosage;
     public int every;
-    public int treatmentId;
+    public int treatmentID;
     public boolean isEqually;
 
     public Medicament(){
@@ -20,7 +20,7 @@ public class Medicament {
         this.days = days;
         this.dosage = dosage;
         this.every = every;
-        this.treatmentId = treatmentId;
+        this.treatmentID = treatmentId;
         this.isEqually = isEqually;
     }
 
@@ -64,13 +64,14 @@ public class Medicament {
         this.every = every;
     }
 
-    public int getTreatmentId() {
-        return treatmentId;
+    public int getTreatmentID() {
+        return treatmentID;
     }
 
-    public void setTreatmentId(int treatmentId) {
-        this.treatmentId = treatmentId;
+    public void setTreatmentID(int treatmentID) {
+        this.treatmentID = treatmentID;
     }
+
     public long getTime(int i){
         int start = 9*3600;
         int end = 22*3600;
@@ -85,7 +86,7 @@ public class Medicament {
                 ", days=" + days +
                 ", dosage=" + dosage +
                 ", every=" + every +
-                ", treatmentId=" + treatmentId +
+                ", treatmentId=" + treatmentID +
                 '}';
     }
 }

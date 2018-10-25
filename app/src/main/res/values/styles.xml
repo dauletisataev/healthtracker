@@ -21,4 +21,12 @@
         <item name="android:bottomRightRadius">6dp</item>
         <item name="android:background">#fff</item>
     </style>
+    <style name="medicament_view">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:background">#fff</item>
+        <item name="android:layout_margin">1dp</item>
+        <item name="android:paddingLeft">15dp</item>
+    </style>
 </resources>

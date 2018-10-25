@@ -24,6 +24,7 @@
     <EditText
         android:id="@+id/iinText"
         style="@style/EdTx"
+        android:inputType="number"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="28dp"
@@ -37,12 +38,14 @@
     <EditText
         android:id="@+id/phoneNumber"
         style="@style/EdTx"
+        android:inputType="phone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:background="@drawable/ed_text"
         android:hint="Сотовый номер"
         android:padding="10dp"
+        android:maxLength="12"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.6"
         app:layout_constraintStart_toStartOf="parent"

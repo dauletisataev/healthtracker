@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     tools:context=".fragments.ScheduleFragment">
 
     <LinearLayout
@@ -18,6 +19,32 @@
             android:layout_height="wrap_content"
             android:background="@color/colorPrimary"
             app:textColorSelected="#FFFF" />
+        <LinearLayout
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:layout_margin="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#fff"
+            android:orientation="horizontal">
+            <!--<com.github.lzyzsd.circleprogress.DonutProgress-->
+                <!--android:layout_marginLeft="50dp"-->
+                <!--android:id="@+id/donut_progress"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--custom:donut_progress="30"/>-->
+            <com.github.lzyzsd.circleprogress.ArcProgress
+                android:id="@+id/arc_progress"
+                android:background="#fff"
+                android:layout_gravity="center"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                custom:arc_unfinished_color="@color/colorAccent"
+                custom:arc_finished_color="@color/colorPrimary"
+                custom:arc_progress="0"
+                custom:arc_text_size="18dp"
+                custom:arc_bottom_text="ВЫПОЛНЕНО"/>
+        </LinearLayout>
 
         <ProgressBar
             android:id="@+id/progressbar"
