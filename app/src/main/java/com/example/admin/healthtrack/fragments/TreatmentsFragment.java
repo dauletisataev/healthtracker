@@ -18,12 +18,7 @@ import com.example.admin.healthtrack.adapter.TreatmentAdapter;
 import com.example.admin.healthtrack.models.Medicament;
 import com.example.admin.healthtrack.models.Treatment;
 import com.example.admin.healthtrack.views.MedicamentDialog;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+
 
 import java.util.ArrayList;
 
@@ -38,7 +33,6 @@ public class TreatmentsFragment extends Fragment implements TreatmentAdapter.Ite
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-    FirebaseDatabase database;
     ArrayList<Treatment> treatments;
     TreatmentAdapter adapter;
     RecyclerView recyclerView;
@@ -78,17 +72,17 @@ public class TreatmentsFragment extends Fragment implements TreatmentAdapter.Ite
             IIN = prefs.getString("IIN", "0");
             Log.d("mLog", "IIN: "+IIN);
         }
-        database = FirebaseDatabase.getInstance();
+        //database = FirebaseDatabase.getInstance();
         treatments = new ArrayList<>();
         adapter = new TreatmentAdapter(treatments );
         adapter.setClickListener(this);
         recyclerView = rootView.findViewById(R.id.treatmentsRV);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
-        getTreatments();
+        //getTreatments();
         return rootView;
     }
-    void getTreatments(){
+   /* void getTreatments(){
         DatabaseReference myRef = database.getReference("Treatments");
         myRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -153,7 +147,7 @@ public class TreatmentsFragment extends Fragment implements TreatmentAdapter.Ite
         public void onCancelled(@NonNull DatabaseError databaseError) {
 
         }
-    };
+    };*/
 
     @Override
     public void onItemClick(Medicament med) {

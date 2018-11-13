@@ -1,13 +1,9 @@
 package com.example.admin.healthtrack.fragments;
 
-import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Paint;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -15,26 +11,30 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.admin.healthtrack.R;
-import com.example.admin.healthtrack.activity.MainActivity;
 import com.example.admin.healthtrack.adapter.ScheduleAdapter;
-import com.example.admin.healthtrack.models.Medicament;
+import com.example.admin.healthtrack.models.TaskItem;
 import com.example.admin.healthtrack.models.TodoItem;
+import com.example.admin.healthtrack.views.ConfirmDialog;
 import com.example.admin.healthtrack.views.FinishedDialog;
 import com.github.lzyzsd.circleprogress.ArcProgress;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
-import org.w3c.dom.Text;
-
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -43,7 +43,6 @@ import devs.mulham.horizontalcalendar.utils.HorizontalCalendarListener;
 import es.dmoral.toasty.Toasty;
 
 import static android.content.Context.MODE_PRIVATE;
-import static android.support.constraint.Constraints.TAG;
 
 public class ScheduleFragment extends Fragment implements ScheduleAdapter.ItemClickListener{
     // TODO: Rename parameter arguments, choose names that match
@@ -55,11 +54,15 @@ public class ScheduleFragment extends Fragment implements ScheduleAdapter.ItemCl
     private String mParam1;
     private String mParam2;
     View rootView;
-    FirebaseDatabase database;
+    FirebaseFirestore database;
     ArrayList<TodoItem> todos;
+    ArrayList<TaskItem> tasks;
     ScheduleAdapter adapter;
     RecyclerView recyclerView;
+    ArcProgress arcProgress;
     int finishedCount = 0;
+    CollectionReference treatmentCourses;
+    ProgressBar progressBar;
     public ScheduleFragment() {
         // Required empty public constructor
     }
@@ -95,17 +98,26 @@ public class ScheduleFragment extends Fragment implements ScheduleAdapter.ItemCl
             IIN = prefs.getString("IIN", "0");
             Log.d("mLog", "IIN: "+IIN);
         }
-
+        IIN = "990192934567";
         Calendar startDate = Calendar.getInstance();
-        database = FirebaseDatabase.getInstance();
+
+        database = FirebaseFirestore.getInstance();
+
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setTimestampsInSnapshotsEnabled(true)
+                .build();
+        database.setFirestoreSettings(settings);
+
         startDate.add(Calendar.MONTH, -1);
         todos = new ArrayList<>();
+        tasks = new ArrayList<>();
         adapter = new ScheduleAdapter(getContext(), todos);
         adapter.setClickListener(this);
         recyclerView = rootView.findViewById(R.id.scheduleRv);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
-
+        progressBar = rootView.findViewById(R.id.progressbar);
+        arcProgress  = (ArcProgress) rootView.findViewById(R.id.arc_progress);
         /* ends after 1 month from now */
         Calendar endDate = Calendar.getInstance();
         endDate.add(Calendar.MONTH, 1);
@@ -118,96 +130,112 @@ public class ScheduleFragment extends Fragment implements ScheduleAdapter.ItemCl
         horizontalCalendar.setCalendarListener(new HorizontalCalendarListener() {
             @Override
             public void onDateSelected(Calendar date, int position) {
-                Toasty.info(getContext(), date.get(Calendar.DAY_OF_MONTH)+"/"+ date.get(Calendar.MONTH), Toast.LENGTH_SHORT, true).show();
+                //Toasty.info(getContext(), date.get(Calendar.DAY_OF_MONTH)+"/"+ date.get(Calendar.MONTH), Toast.LENGTH_SHORT, true).show();
+                progressBar.setVisibility(View.VISIBLE);
+                dayUpdated(date);
             }
         });
-        getMedicaments();
+
+        treatmentCourses = database.collection("treatmentCourses");
+        treatmentCourses.whereEqualTo("patientId", IIN)
+        .get()
+        .addOnCompleteListener(onCompleteListener)
+        .addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toasty.warning(getContext(),"Couldn't get any data").show();
+            }
+        });
         return rootView;
     }
-    void getMedicaments(){
-        DatabaseReference myRef = database.getReference("Patients").child(IIN).child("treatment");
-        myRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
-                int treatmentId = dataSnapshot.getValue(Integer.class);
-                Log.d("mLog", "Id is: " + treatmentId);
-                DatabaseReference medicamentRef = database.getReference("medicaments");
-                medicamentRef.orderByChild("treatmentID").equalTo(treatmentId).addChildEventListener(medicamentRefListener);
 
+    OnCompleteListener onCompleteListener = new OnCompleteListener<QuerySnapshot>() {
+        @Override
+        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+            if (task.isSuccessful()) {
+                for (DocumentSnapshot document : task.getResult().getDocuments()) {
+                    Log.d("mLog", document.getId() + " => " + document.getData());
+                    CollectionReference collectionReference = treatmentCourses.document(document.getId()).collection("tasks");
+                    collectionReference.get().addOnCompleteListener(onTasksLoadCompleted);
+                    //Log.d("mLog", "onComplete: "+ documentReference.getPath());
+
+                }
+            } else {
+                Log.w("mLog", "Error getting documents.", task.getException());
             }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                // Failed to read value
-                Log.w("mLog", "Failed to read value.", error.toException());
-            }
-        });
-    }
-
-    ChildEventListener medicamentRefListener = new ChildEventListener() {
-        @Override
-        public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            Medicament medicament = (Medicament) dataSnapshot.getValue(Medicament.class);
-            Log.d("mLog", "onChildAdded: "+ medicament);
-            for(int i = 0; i < medicament.count; i++) {
-                Log.d("mLog", "getTime: "+medicament.getTime(i));
-                int hour = (int)medicament.getTime(i)/3600;
-                int minutes = ((int) medicament.getTime(i)%3600) / 60;
-                String time = hour + ":" + minutes;
-                if(minutes <10) time+="0";
-                todos.add(new TodoItem(time, medicament.name + " " + medicament.dosage + "мг", false));
-            }
-            adapter.notifyDataSetChanged();
-            recyclerView.setVisibility(View.VISIBLE);
-            rootView.findViewById(R.id.progressbar).setVisibility(View.GONE);
-        }
-
-        @Override
-        public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-        }
-
-        @Override
-        public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-        }
-
-        @Override
-        public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-        }
-
-        @Override
-        public void onCancelled(@NonNull DatabaseError databaseError) {
-
         }
     };
 
-    @Override
-    public void onItemClick(View view, int position) {
-        TodoItem item = todos.get(position);
-        if(!item.isFinished()) {
-            CheckBox checkBox = (CheckBox) view.findViewById(R.id.finished);
-            TextView time = view.findViewById(R.id.time);
-            TextView text = view.findViewById(R.id.text);
-            if(!checkBox.isChecked())  {
-                view.setEnabled(false);
-                view.setAlpha(0.5f);
-                time.setPaintFlags(time.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                text.setPaintFlags(time.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                checkBox.setChecked(true);
-                finishedCount++;
-                Toasty.success(getContext(), "Молоцом!").show();
-                if(finishedCount == todos.size()) {
-                    FinishedDialog dialog = new FinishedDialog(getActivity());
-                    dialog.show();
+    OnCompleteListener onTasksLoadCompleted = new OnCompleteListener<QuerySnapshot>() {
+        @Override
+        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+            if (task.isSuccessful()) {
+                for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
+                    TaskItem mTask = queryDocumentSnapshot.toObject(TaskItem.class);
+                    tasks.add(mTask);
+                    if (mTask.isGoingToday(Calendar.getInstance())){
+                        TodoItem todo = new TodoItem(mTask.getStringTime(), mTask.getTitle(),  false);
+                        todos.add(todo);
+                    }
                 }
+                adapter.notifyDataSetChanged();
+                recyclerView.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.GONE);
+            } else {
+                Log.w("mLog", "Error getting documents.", task.getException());
             }
         }
-        updateCircleState();
+    };
+
+    private void dayUpdated(Calendar date){
+        todos.clear();
+        finishedCount = 0;
+        arcProgress.setProgress(0);
+        for(TaskItem mTask: tasks){
+            if (mTask.isGoingToday(date)){
+                TodoItem todo = new TodoItem(mTask.getStringTime(), mTask.getTitle(),  false);
+                todos.add(todo);
+            }
+        }
+        adapter = new ScheduleAdapter(getContext(), todos);
+        adapter.setClickListener(this);
+        recyclerView.setAdapter(adapter);
+        progressBar.setVisibility(View.GONE);
+    }
+
+
+    @Override
+    public void onItemClick(final View view, int position) {
+        TodoItem item = todos.get(position);
+        if(!item.isFinished()) {
+            final CheckBox checkBox = (CheckBox) view.findViewById(R.id.finished);
+            final TextView time = view.findViewById(R.id.time);
+            final TextView text = view.findViewById(R.id.text);
+            if(!checkBox.isChecked())  {
+                ConfirmDialog confirmDialog = new ConfirmDialog(getActivity());
+                confirmDialog.setClickListener(new ConfirmDialog.mClickListener() {
+                    @Override
+                    public void onClicked(View v) {
+                        if(v.getId() == R.id.submit){
+                            view.setEnabled(false);
+                            view.setAlpha(0.5f);
+                            time.setPaintFlags(time.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                            text.setPaintFlags(time.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                            checkBox.setChecked(true);
+                            finishedCount++;
+                            //Toasty.success(getContext(), "Молоцом!").show();
+                            if(finishedCount == todos.size()) {
+                                FinishedDialog dialog = new FinishedDialog(getActivity());
+                                dialog.show();
+                            }
+                            updateCircleState();
+                        }
+                    }
+                });
+                confirmDialog.show();
+            }
+        }
+
     }
     void updateCircleState(){
         ArcProgress arc = rootView.findViewById(R.id.arc_progress);
